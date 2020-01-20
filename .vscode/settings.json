@@ -15,5 +15,6 @@
         "statusBar.foreground": "#15202b"
     },
     "peacock.color": "#5dc9e2",
-    "python.pythonPath": "C:\\ProgramData\\Anaconda3\\python.exe"
+    "python.pythonPath": "C:\\ProgramData\\Anaconda3\\python.exe",
+    "python.formatting.provider": "yapf"
 }
