@@ -45,26 +45,32 @@ app.layout = html.Div([
                  'display': 'inline-block'
              }),
     html.Div([html.Button('Submit', id='submit-button', n_clicks=0)],
+            #  [html.Button('Reset', id='reset-button', n_clicks=0)],
              style={
-                 'width': '15%',
+                 'width': '10%',
                  'display': 'inline-block'
              }),
     dcc.Graph(id='table')
 ])
 
 
-@app.callback(Output("table", 'figure'), [Input('submit-button', 'n_clicks')], [
-    State('prom1', 'value'),
-    State('prom2', 'value'),
-    State('prom3', 'value')
-])
-def update_df(n_clicks, prom1, prom2, prom3):
-    df_table.loc[df_table.month > 9, 'prom1'] = prom1
-    df_table.loc[df_table.month > 9, 'prom2'] = prom2
-    df_table.loc[df_table.month > 9, 'prom3'] = prom3
-    df_table.loc[df_table.month > 9, 'output'] = float(
-        prom1) * df_table.prom1_coef + float(
-            prom2)**df_table.prom2_coef + float(prom3) * df_table.prom3_coef
+@app.callback(Output("table", 'figure'), [Input('submit-button', 'n_clicks')],
+              [
+                  State('prom1', 'value'),
+                  State('prom2', 'value'),
+                  State('prom3', 'value')
+              ])
+def update_graph(n_clicks, prom1, prom2, prom3):
+    if n_clicks == 0:
+        df_table
+    else:
+        df_table.loc[df_table.month > 9, 'prom1'] = prom1
+        df_table.loc[df_table.month > 9, 'prom2'] = prom2
+        df_table.loc[df_table.month > 9, 'prom3'] = prom3
+        df_table.loc[df_table.month > 9, 'output'] = float(
+            prom1) * df_table.prom1_coef + float(
+                prom2
+            )**df_table.prom2_coef + float(prom3) * df_table.prom3_coef
     return {
         'data': [
             dict(x=df_table.month,
@@ -83,6 +89,12 @@ def update_df(n_clicks, prom1, prom2, prom3):
             yaxis={'title': "TRx"},
         )
     }
+
+
+# @app.callback(Output('submit-button', 'n_clicks'),
+#               [Input('reset-button', 'n_clicks')])
+# def update(reset):
+#     return 0
 
 
 if __name__ == '__main__':
