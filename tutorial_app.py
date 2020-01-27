@@ -3,6 +3,7 @@ import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import pandas as pd
+import numpy as np
 
 df_table = pd.read_csv(
     'https://gist.githubusercontent.com/chriddyp/c78bf172206ce24f77d6363a2d754b59/raw/c353e8ef842413cae56ae3920b8fd78468aa4cb2/usa-agricultural-exports-2011.csv'
@@ -26,6 +27,10 @@ all_options = {
     'America': ['New York City', 'San Francisco', 'Cincinnati'],
     'Canada': [u'Montréal', 'Toronto', 'Ottawa']
 }
+
+# sample data for cross filter
+np.random.seed(0)
+df_cross = pd.DataFrame({"Col " + str(i+1): np.random.rand(30) for i in range(6)})
 
 # generate HTML table from the dataset
 def generate_table(dataframe, max_rows=10):
@@ -310,9 +315,9 @@ app.layout = html.Div([
 
     html.Div(id='display-selected-values'),
 
-html.Div(
+    html.Div(
         children=
-        'Basic alignment based on page width, need better CSS to avoid any overlay',
+        'Right 2 charts will change based on the hover position on the left scatter plot. The basic alignment based on page width, need better CSS to avoid any overlay.',
         style={
             'padding-top': '40px',
             'padding-bottom': '40px',
@@ -358,9 +363,12 @@ html.Div(
     html.Div([
         dcc.Graph(
             id='crossfilter-indicator-scatter',
-            hoverData={'points': [{'customdata': 'Japan'}]}
+            hoverData={'points': [{'customdata':'Japan'}]}
+            # hover item setting
         )
     ], style={'width': '49%', 'display': 'inline-block', 'padding': '0 20'}),
+    # use width only to align 3 different chart, increase padding should remove the overlay
+
     html.Div([
         dcc.Graph(id='x-time-series'),
         dcc.Graph(id='y-time-series'),
@@ -373,8 +381,17 @@ html.Div(
         value=df_multi['Year'].max(),
         marks={str(year): str(year) for year in df_multi['Year'].unique()},
         step=None
-    ), style={'width': '49%', 'padding': '0px 20px 20px 20px'})
+    ), style={'width': '49%', 'padding': '0px 20px 20px 20px'}),
 
+
+    html.Div(
+        children=
+        'Cross filter among different charts',
+        style={
+            'padding-top': '40px',
+            'padding-bottom': '40px',
+        },
+    ),
 
 ])
 
@@ -479,6 +496,7 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             },
             margin={'l': 40, 'b': 40, 't': 10, 'r': 0},
             hovermode='closest'
+            # default is closet, if clickmode lacks the select flag it will be set to 'x' or 'y' depends on the orientation value
         )
     }
 
@@ -506,6 +524,7 @@ def set_display_children(selected_country, selected_city):
         selected_city, selected_country,
     )
 
+# similer to the one at line 450
 @app.callback(
     dash.dependencies.Output('crossfilter-indicator-scatter', 'figure'),
     [dash.dependencies.Input('crossfilter-xaxis-column', 'value'),
@@ -568,7 +587,7 @@ def create_time_series(df_tmp, axis_type, title):
         }
     }
 
-
+# following two callbacks will update right two charts based on mouse hover
 @app.callback(
     dash.dependencies.Output('x-time-series', 'figure'),
     [dash.dependencies.Input('crossfilter-indicator-scatter', 'hoverData'),
