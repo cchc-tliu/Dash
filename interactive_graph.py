@@ -45,12 +45,16 @@ app.layout = html.Div([
                  'display': 'inline-block'
              }),
     html.Div([html.Button('Submit', id='submit-button', n_clicks=0)],
-            #  [html.Button('Reset', id='reset-button', n_clicks=0)],
              style={
                  'width': '10%',
                  'display': 'inline-block'
              }),
-    dcc.Graph(id='table')
+    html.Div([html.Button('Reset', id='reset-button', n_clicks=0)],
+             style={
+                 'width': '10%',
+                 'display': 'inline-block'
+             }),
+    dcc.Graph(id='table'),
 ])
 
 
@@ -58,23 +62,23 @@ app.layout = html.Div([
               [
                   State('prom1', 'value'),
                   State('prom2', 'value'),
-                  State('prom3', 'value')
+                  State('prom3', 'value'),
               ])
 def update_graph(n_clicks, prom1, prom2, prom3):
     if n_clicks == 0:
-        df_table
+        df_tmp = df_table.copy()
     else:
-        df_table.loc[df_table.month > 9, 'prom1'] = prom1
-        df_table.loc[df_table.month > 9, 'prom2'] = prom2
-        df_table.loc[df_table.month > 9, 'prom3'] = prom3
-        df_table.loc[df_table.month > 9, 'output'] = float(
-            prom1) * df_table.prom1_coef + float(
-                prom2
-            )**df_table.prom2_coef + float(prom3) * df_table.prom3_coef
+        df_tmp = df_table.copy()
+        df_tmp.loc[df_tmp.month > 9, 'prom1'] = prom1
+        df_tmp.loc[df_tmp.month > 9, 'prom2'] = prom2
+        df_tmp.loc[df_tmp.month > 9, 'prom3'] = prom3
+        df_tmp.loc[df_tmp.month > 9, 'output'] = float(
+            prom1) * df_tmp.prom1_coef + float(
+                prom2)**df_tmp.prom2_coef + float(prom3) * df_tmp.prom3_coef
     return {
         'data': [
-            dict(x=df_table.month,
-                 y=df_table.output,
+            dict(x=df_tmp.month,
+                 y=df_tmp.output,
                  mode='lines+markers',
                  marker={
                      'size': 10,
@@ -91,10 +95,10 @@ def update_graph(n_clicks, prom1, prom2, prom3):
     }
 
 
-# @app.callback(Output('submit-button', 'n_clicks'),
-#               [Input('reset-button', 'n_clicks')])
-# def update(reset):
-#     return 0
+@app.callback(Output('submit-button', 'n_clicks'),
+              [Input('reset-button', 'n_clicks')])
+def update(reset):
+    return 0
 
 
 if __name__ == '__main__':
