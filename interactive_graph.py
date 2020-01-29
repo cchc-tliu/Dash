@@ -7,7 +7,9 @@ from dash.exceptions import PreventUpdate
 import pandas as pd
 import numpy as np
 
-df_table = pd.read_csv('C:/Users/TLIU/Desktop/demo_data.csv')
+df_table = pd.read_csv('C:/Users/TLIU/Desktop/Cobbs/Dash/demo_data.csv')
+
+hovertemplate = "<b> Month %{x} <br> TRx %{y} <br> Type: %{z}"
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -65,24 +67,79 @@ app.layout = html.Div([
                   State('prom3', 'value'),
               ])
 def update_graph(n_clicks, prom1, prom2, prom3):
-    if n_clicks == 0:
-        df_tmp = df_table.copy()
+    if n_clicks > 0: # should have better logic here
+        if prom1 != 0:
+            df_tmp = df_table.copy()
+            df_tmp.loc[df_tmp.month > 9, 'prom1'] = prom1
+            df_tmp.loc[df_tmp.month > 9,
+                       'output'] = float(prom1) * df_tmp.prom1_coef + float(
+                           prom2
+                       )**df_tmp.prom2_coef + float(prom3) * df_tmp.prom3_coef
+        if prom2 != 0:
+            df_tmp = df_table.copy()
+            df_tmp.loc[df_tmp.month > 9, 'prom2'] = prom2
+            df_tmp.loc[df_tmp.month > 9,
+                       'output'] = float(prom1) * df_tmp.prom1_coef + float(
+                           prom2
+                       )**df_tmp.prom2_coef + float(prom3) * df_tmp.prom3_coef
+        if prom3 != 0:
+            df_tmp = df_table.copy()
+            df_tmp.loc[df_tmp.month > 9, 'prom3'] = prom3
+            df_tmp.loc[df_tmp.month > 9,
+                       'output'] = float(prom1) * df_tmp.prom1_coef + float(
+                           prom2
+                       )**df_tmp.prom2_coef + float(prom3) * df_tmp.prom3_coef
+        if prom1 != 0 and prom2 != 0:
+            df_tmp = df_table.copy()
+            df_tmp.loc[df_tmp.month > 9, 'prom1'] = prom1
+            df_tmp.loc[df_tmp.month > 9, 'prom2'] = prom2
+            df_tmp.loc[df_tmp.month > 9,
+                       'output'] = float(prom1) * df_tmp.prom1_coef + float(
+                           prom2
+                       )**df_tmp.prom2_coef + float(prom3) * df_tmp.prom3_coef
+        if prom1 != 0 and prom3 != 0:
+            df_tmp = df_table.copy()
+            df_tmp.loc[df_tmp.month > 9, 'prom1'] = prom1
+            df_tmp.loc[df_tmp.month > 9, 'prom3'] = prom3
+            df_tmp.loc[df_tmp.month > 9,
+                       'output'] = float(prom1) * df_tmp.prom1_coef + float(
+                           prom2
+                       )**df_tmp.prom2_coef + float(prom3) * df_tmp.prom3_coef
+        if prom2 != 0 and prom3 != 0:
+            df_tmp = df_table.copy()
+            df_tmp.loc[df_tmp.month > 9, 'prom2'] = prom2
+            df_tmp.loc[df_tmp.month > 9, 'prom3'] = prom3
+            df_tmp.loc[df_tmp.month > 9,
+                       'output'] = float(prom1) * df_tmp.prom1_coef + float(
+                           prom2
+                       )**df_tmp.prom2_coef + float(prom3) * df_tmp.prom3_coef
+        if prom1 != 0 and prom2 != 0 and prom3 != 0:
+            df_tmp = df_table.copy()
+            df_tmp.loc[df_tmp.month > 9, 'prom1'] = prom1
+            df_tmp.loc[df_tmp.month > 9, 'prom2'] = prom2
+            df_tmp.loc[df_tmp.month > 9, 'prom3'] = prom3
+            df_tmp.loc[df_tmp.month > 9,
+                       'output'] = float(prom1) * df_tmp.prom1_coef + float(
+                           prom2
+                       )**df_tmp.prom2_coef + float(prom3) * df_tmp.prom3_coef
     else:
         df_tmp = df_table.copy()
-        df_tmp.loc[df_tmp.month > 9, 'prom1'] = prom1
-        df_tmp.loc[df_tmp.month > 9, 'prom2'] = prom2
-        df_tmp.loc[df_tmp.month > 9, 'prom3'] = prom3
-        df_tmp.loc[df_tmp.month > 9, 'output'] = float(
-            prom1) * df_tmp.prom1_coef + float(
-                prom2)**df_tmp.prom2_coef + float(prom3) * df_tmp.prom3_coef
     return {
         'data': [
             dict(x=df_tmp.month,
                  y=df_tmp.output,
+                 color=df_tmp.type,
+                 hovertemplate=hovertemplate, #type in hover not working
                  mode='lines+markers',
                  marker={
-                     'size': 10,
-                 })
+                     'color': [
+                         "#1f77b4", "#1f77b4", "#1f77b4", "#1f77b4",
+                         "#1f77b4", "#1f77b4", "#1f77b4", "#1f77b4",
+                         "#1f77b4", "red", "red", "red"
+                     ],
+                     'size':
+                     10,
+                 }) # need split into 2 traces to set different line color
         ],
         'layout':
         dict(
@@ -90,7 +147,10 @@ def update_graph(n_clicks, prom1, prom2, prom3):
                 'title': "Month",
                 'tickmode': 'linear'
             },
-            yaxis={'title': "TRx"},
+            yaxis={
+                'title': "TRx",
+                'range': [0, 15]
+            },
         )
     }
 
